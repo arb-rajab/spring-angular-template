@@ -1,0 +1,46 @@
+@if (loading()) {
+  <div class="table-state"><app-spinner label="Loading rows" /></div>
+} @else if (rows().length === 0) {
+  <app-empty-state [title]="emptyTitle()" [description]="emptyDescription()" />
+} @else {
+  <div class="table-scroll">
+    <table>
+      <caption class="visually-hidden">
+        {{ caption() }}
+      </caption>
+      <thead>
+        <tr>
+          @for (column of columns(); track column.key) {
+            <th scope="col" [attr.aria-sort]="ariaSort(column)">
+              @if (column.sortable) {
+                <button type="button" class="sort-button" (click)="toggleSort(column)">
+                  {{ column.header }}
+                  <span aria-hidden="true">{{ ariaSort(column) === 'ascending' ? '▲' : ariaSort(column) === 'descending' ? '▼' : '' }}</span>
+                </button>
+              } @else {
+                {{ column.header }}
+              }
+            </th>
+          }
+          @if (rowActions()) {
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track $index) {
+          <tr>
+            @for (column of columns(); track column.key) {
+              <td>{{ column.cell(row) }}</td>
+            }
+            @if (rowActions(); as actions) {
+              <td>
+                <ng-container [ngTemplateOutlet]="actions" [ngTemplateOutletContext]="{ $implicit: row }" />
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

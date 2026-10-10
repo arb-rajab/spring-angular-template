@@ -1,0 +1,15 @@
+@if (auth.isAuthenticated()) {
+  <nav class="nav">
+    <div class="nav-brand">ProjectName</div>
+    <div class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      @if (auth.hasAnyRole('ROLE_ADMIN')) {
+        <a routerLink="/users" routerLinkActive="active">Users</a>
+      }
+    </div>
+    <div class="nav-user">
+      <span class="muted">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
+      <button class="btn btn-secondary" type="button" (click)="logout()">Log out</button>
+    </div>
+  </nav>
+}

@@ -1,0 +1,13 @@
+<div class="form-field">
+  <label [attr.for]="inputId()">{{ label() }}</label>
+  <ng-content />
+  @if (messages().length > 0) {
+    <ul class="field-errors" [id]="inputId() + '-errors'">
+      @for (message of messages(); track message) {
+        <li class="error-text">{{ message }}</li>
+      }
+    </ul>
+  } @else if (hint()) {
+    <small class="muted">{{ hint() }}</small>
+  }
+</div>

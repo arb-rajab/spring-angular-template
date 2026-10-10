@@ -1,0 +1,9 @@
+<div class="page">
+  <h1>Welcome, {{ auth.currentUser()?.firstName }}</h1>
+  <div class="card">
+    <p class="muted">This is the starting point of your application. Replace it with your own content.</p>
+    @if (auth.hasAnyRole('ROLE_ADMIN')) {
+      <p><a routerLink="/users">Manage users</a></p>
+    }
+  </div>
+</div>

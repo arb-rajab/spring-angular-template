@@ -1,0 +1,72 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    ignore:
+      # Angular packages must move together as a migration (`ng update`); a single
+      # @angular/* or zone.js major bump on its own fails the frontend build.
+      - dependency-name: '@angular/*'
+        update-types: ['version-update:semver-major']
+      # zone.js is 0.x, so Dependabot reports 0.15 -> 0.16 as a "minor" bump: ignore both.
+      - dependency-name: zone.js
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      # angular-eslint tracks the Angular major.
+      - dependency-name: angular-eslint
+        update-types: ['version-update:semver-major']
+      # The Angular toolchain targets one TypeScript line; a newer major fails the build.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+      # The lint plugins peer a specific ESLint major.
+      - dependency-name: eslint
+        update-types: ['version-update:semver-major']
+      # jasmine-core and @types/jasmine move together with the Karma toolchain.
+      - dependency-name: jasmine-core
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@types/jasmine'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+    ignore:
+      # The JDK/JRE major moves deliberately with `java.version` in pom.xml and the CI JDK,
+      # after the test suite has run on it; not as a base-image drive-by bump.
+      - dependency-name: eclipse-temurin
+        update-types: ['version-update:semver-major']
+      # The build image's JDK is tied to the same decision.
+      - dependency-name: maven
+
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: weekly
+    ignore:
+      # Stay on a Node LTS the Angular CLI supports; moves with the Angular migration.
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  # Service images pinned in docker-compose.yml
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      # Major bumps of stateful services (database, identity provider) need a deliberate
+      # data-migration plan, not a drive-by version bump.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']

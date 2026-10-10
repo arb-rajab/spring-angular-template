@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    root: INFO
+    com.example.projectname: INFO
+
+# JWT_SECRET, DB_URL, DB_USERNAME, DB_PASSWORD, OIDC_CLIENT_SECRET and CORS_ALLOWED_ORIGINS
+# MUST be supplied via environment variables or a secret manager in production.
+# There is no fallback default for app.security.jwt.secret in this profile; startup fails
+# fast if it is missing (see JwtService).

@@ -1,0 +1,29 @@
+.table-scroll {
+  overflow-x: auto;
+}
+
+.table-state {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.sort-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

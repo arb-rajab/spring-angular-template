@@ -1,0 +1,48 @@
+<div class="page">
+  <div class="toolbar">
+    <h1>Users</h1>
+    @if (data(); as page) {
+      <span class="muted">{{ page.totalItems }} total</span>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <app-alert variant="error">{{ errorMessage() }}</app-alert>
+  }
+
+  <div class="card">
+    <ng-template #actions let-user>
+      <app-button variant="secondary" (click)="showDetails(user)">Details</app-button>
+    </ng-template>
+
+    <app-data-table
+      caption="Users"
+      emptyTitle="No users yet"
+      emptyDescription="Users appear here once they register."
+      [columns]="columns"
+      [rows]="data()?.items ?? []"
+      [loading]="loading()"
+      [sort]="sort()"
+      [rowActions]="actions"
+      (sortChange)="changeSort($event)"
+    />
+
+    @if (data(); as page) {
+      <app-pagination [page]="page.page" [totalPages]="page.totalPages" (pageChange)="load($event)" />
+    }
+  </div>
+
+  <app-modal title="User details" [(open)]="detailsOpen">
+    @if (selected(); as user) {
+      <dl class="details">
+        <dt>Name</dt>
+        <dd>{{ user.firstName }} {{ user.lastName }}</dd>
+        <dt>Email</dt>
+        <dd>{{ user.email }}</dd>
+        <dt>Roles</dt>
+        <dd>{{ user.roles.join(', ') }}</dd>
+      </dl>
+    }
+    <app-button modal-actions variant="secondary" (click)="detailsOpen = false">Close</app-button>
+  </app-modal>
+</div>

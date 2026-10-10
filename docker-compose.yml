@@ -1,0 +1,99 @@
+networks:
+  # Fixed subnet so the backend can pin its rate limiter's trusted-proxy list to the frontend
+  # (nginx) container's address below, rather than trusting Compose's default, unpredictable
+  # bridge subnet - see RATE_LIMIT_TRUSTED_PROXIES on the backend service.
+  project-name-net:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-project_name}
+      POSTGRES_USER: ${DB_USERNAME:-project_name}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-project_name}
+    ports:
+      - '5432:5432'
+    volumes:
+      - project-name-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-project_name}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - project-name-net
+
+  # Local, open-source OIDC provider for the SSO login path - see keycloak/README.md. Never a
+  # stand-in for a real identity provider: it only needs to be reachable from `localhost` and
+  # this compose network.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8
+    command: ['start-dev', '--import-realm']
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: 'true'
+    volumes:
+      - ./keycloak/project-name-realm.json:/opt/keycloak/data/import/project-name-realm.json:ro
+    ports:
+      - '8180:8080'
+    healthcheck:
+      test: ['CMD-SHELL', 'exec 3<>/dev/tcp/localhost/8080 && echo -e "GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n" >&3 && grep -q "UP" <&3']
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks:
+      - project-name-net
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-project_name}
+      DB_USERNAME: ${DB_USERNAME:-project_name}
+      DB_PASSWORD: ${DB_PASSWORD:-project_name}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in your .env file - see .env.example}
+      CORS_ALLOWED_ORIGINS: http://localhost:8081
+      # The browser only ever knows Keycloak as `localhost:8180` (the authorization endpoint it is
+      # redirected to); the backend container reaches the same Keycloak over the compose network
+      # as `keycloak:8080` for everything it calls server-to-server (token exchange, JWKS,
+      # userinfo). See the comment on `spring.security.oauth2.client.provider.keycloak` in
+      # application.yml for why these are separate endpoint URIs instead of one `issuer-uri`.
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-project-name-dev-secret}
+      OIDC_AUTHORIZATION_URI: http://localhost:8180/realms/project-name/protocol/openid-connect/auth
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/project-name/protocol/openid-connect/token
+      OIDC_JWKS_URI: http://keycloak:8080/realms/project-name/protocol/openid-connect/certs
+      OIDC_USERINFO_URI: http://keycloak:8080/realms/project-name/protocol/openid-connect/userinfo
+      OIDC_FRONTEND_REDIRECT_URI: http://localhost:8081/sso/callback
+      # Only the frontend (nginx) container's fixed address below may set X-Forwarded-For and
+      # X-Real-IP for the rate limiter - see ClientIpResolver. A direct caller on the :8080
+      # mapping below (bypassing the proxy) is never on this address, so it cannot spoof them.
+      RATE_LIMIT_TRUSTED_PROXIES: 172.28.0.10/32
+    ports:
+      - '8080:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - project-name-net
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - '8081:8080'
+    depends_on:
+      - backend
+    networks:
+      project-name-net:
+        ipv4_address: 172.28.0.10
+
+volumes:
+  project-name-postgres-data:

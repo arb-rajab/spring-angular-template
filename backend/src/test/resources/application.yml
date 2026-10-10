@@ -1,0 +1,39 @@
+# This file SHADOWS src/main/resources/application.yml entirely during `mvn test`/`mvn verify`:
+# Maven puts target/test-classes ahead of target/classes on the test classpath, so Spring Boot
+# finds this "application.yml" first and never merges in the main one. That is why datasource,
+# JPA and Flyway config is not repeated here (the test base classes supply it) - but the OIDC
+# client registration has no per-test override for a plain (non-Keycloak) test, so it needs a copy
+# here: SecurityConfig.oidcFilterChain() calls .oauth2Login(...) unconditionally and needs a
+# ClientRegistrationRepository to exist. Keep this block's registration id and keys in sync with
+# the real one.
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: project-name-backend
+            client-secret: project-name-dev-secret
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+        provider:
+          keycloak:
+            # Harmless, unreachable placeholders: AbstractOidcIntegrationTest overrides all four
+            # to point at a real Testcontainers Keycloak for the tests that need it; every other
+            # test never calls anything that resolves these URLs.
+            authorization-uri: http://localhost:8180/realms/project-name/protocol/openid-connect/auth
+            token-uri: http://localhost:8180/realms/project-name/protocol/openid-connect/token
+            jwk-set-uri: http://localhost:8180/realms/project-name/protocol/openid-connect/certs
+            user-info-uri: http://localhost:8180/realms/project-name/protocol/openid-connect/userinfo
+
+app:
+  security:
+    jwt:
+      secret: integration-test-signing-secret-at-least-32-bytes-long
+  cors:
+    allowed-origins: http://localhost:4200
+
+logging:
+  level:
+    org.testcontainers: INFO

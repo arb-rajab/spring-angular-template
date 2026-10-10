@@ -1,0 +1,59 @@
+{
+  "realm": "project-name",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginTheme": "keycloak",
+  "clients": [
+    {
+      "clientId": "project-name-backend",
+      "name": "ProjectName backend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "project-name-dev-secret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8080/login/oauth2/code/keycloak",
+        "http://localhost:8081/login/oauth2/code/keycloak"
+      ],
+      "webOrigins": [],
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "sso.newhire@example.test",
+      "email": "sso.newhire@example.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Sasha",
+      "lastName": "Newhire",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "existing.user@example.test",
+      "email": "existing.user@example.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Erin",
+      "lastName": "Existing",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
