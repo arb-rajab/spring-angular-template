@@ -52,10 +52,10 @@ The frontend is served at <http://localhost:8081>, the API at
 
 ### Repository
 
-Governance files (`LICENSE` MIT placeholder, `SECURITY.md`, `CONTRIBUTING.md`,
+Governance files (`LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`,
 `CODE_OF_CONDUCT.md`), issue and pull request templates, Dependabot,
 workflows with SHA-pinned actions (`ci.yml`, `security.yml`, `codeql.yml`),
-empty `osv-scanner.toml` and `.gitleaksignore`, a `docs/project-memory/`
+`osv-scanner.toml` (dated exceptions only), an empty `.gitleaksignore`, a `docs/project-memory/`
 scaffold (`scaffold-memory-pack.sh` recreates missing files) and `CLAUDE.md`.
 
 ## Commands
