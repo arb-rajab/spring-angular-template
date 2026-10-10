@@ -27,6 +27,7 @@ _Last updated: 2026-10-10. Starter template extracted from `enterprise-app`; upd
 - `main` protection (2026-10-10, read back): pull request required (0 approvals), enforced for admins, force pushes and deletions blocked, "require branches to be up to date" off (`strict` false) on purpose. Nobody pushes to `main` directly; status-log updates go through a PR too.
 - Required contexts: `Backend (build, test, lint)`, `Frontend (lint, test, build)`, `Docker image builds`, `Secret scanning (gitleaks)`. Nothing else is required on purpose: osv-scanner, npm audit, dependency review and CodeQL depend on a moving advisory database or run only on some events.
 - `Dependency review (PR diff)` failed on #1 because the dependency graph was still off at the time. Since the graph was turned on it passed on #2 (2026-10-10), so the job works. It is not required, so it never blocked a merge.
+- Rescan 2026-10-10: the README called `LICENSE` a placeholder and `osv-scanner.toml` empty; both were out of date (the licence names arb-rajab, and the file carries the dated `braces` exception). Reworded.
 
 ## Deferred (not re-raised each pass)
 
