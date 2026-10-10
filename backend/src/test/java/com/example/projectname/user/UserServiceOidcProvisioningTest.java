@@ -25,6 +25,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 class UserServiceOidcProvisioningTest {
 
+  private static final String PROVIDER = "keycloak";
+  private static final String NEW_SUBJECT = "kc-subject-123";
+  private static final String LINKED_SUBJECT = "kc-subject-456";
+
   @Mock private UserRepository userRepository;
   @Mock private PasswordEncoder passwordEncoder;
 
@@ -44,11 +48,11 @@ class UserServiceOidcProvisioningTest {
 
     User user =
         userService.findOrProvisionForOidc(
-            "keycloak", "kc-subject-123", "sso.newhire@example.test", "Sasha", "Newhire");
+            PROVIDER, NEW_SUBJECT, "sso.newhire@example.test", "Sasha", "Newhire");
 
     assertThat(user.getEmail()).isEqualTo("sso.newhire@example.test");
-    assertThat(user.getOidcProvider()).isEqualTo("keycloak");
-    assertThat(user.getOidcSubject()).isEqualTo("kc-subject-123");
+    assertThat(user.getOidcProvider()).isEqualTo(PROVIDER);
+    assertThat(user.getOidcSubject()).isEqualTo(NEW_SUBJECT);
     assertThat(user.getRoles()).containsExactly(RoleName.ROLE_USER);
     assertThat(user.isActive()).isTrue();
     assertThat(user.getPasswordHash()).isEqualTo("$2a$10$unguessable-random-hash");
@@ -71,11 +75,11 @@ class UserServiceOidcProvisioningTest {
 
     User linked =
         userService.findOrProvisionForOidc(
-            "keycloak", "kc-subject-456", "existing.user@example.test", "Erin", "Existing");
+            PROVIDER, LINKED_SUBJECT, "existing.user@example.test", "Erin", "Existing");
 
     assertThat(linked).isSameAs(existing);
-    assertThat(linked.getOidcProvider()).isEqualTo("keycloak");
-    assertThat(linked.getOidcSubject()).isEqualTo("kc-subject-456");
+    assertThat(linked.getOidcProvider()).isEqualTo(PROVIDER);
+    assertThat(linked.getOidcSubject()).isEqualTo(LINKED_SUBJECT);
     // The whole point: linking must not touch the password JWT login still relies on.
     assertThat(linked.getPasswordHash()).isEqualTo("$2a$10$original-bcrypt-hash-from-registration");
     assertThat(linked.getRoles()).containsExactly(RoleName.ROLE_ADMIN);
