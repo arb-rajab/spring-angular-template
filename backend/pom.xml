@@ -23,7 +23,7 @@
         <springdoc.version>3.1.1</springdoc.version>
         <spotless.version>3.10.4</spotless.version>
         <testcontainers-keycloak.version>4.4.0</testcontainers-keycloak.version>
-        <bucket4j.version>8.21.0</bucket4j.version>
+        <bucket4j.version>8.22.0</bucket4j.version>
         <!-- Overrides of Spring Boot-managed versions, to pick up newer patch releases that close
              advisories the osv-scanner job flags against Boot's defaults. Drop each one once
              Boot's own managed version catches up. -->
